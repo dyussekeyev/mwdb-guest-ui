@@ -22,7 +22,7 @@
         
         <?php if ($config['captcha_type'] === 'recaptcha'): ?>
             <!-- Google reCAPTCHA -->
-            <div class="g-recaptcha" data-sitekey="<?php echo $config['recaptcha_site_key']; ?>"></div>
+            <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
         <?php else: ?>
             <!-- Custom CAPTCHA -->
             <img src="generate_captcha.php?<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
@@ -60,34 +60,44 @@
             ]);
 
             $response = curl_exec($ch);
-            curl_close($ch);
-
-            $files = json_decode($response, true)['files'];
-
-            if (!empty($files)) {
-                foreach ($files as $file) {
-                    echo "<tr>";
-                    echo "<td>";
-                    echo "File Name: " . htmlspecialchars($file['file_name']) . "<br>";
-                    echo "MD5: " . htmlspecialchars($file['md5']) . "<br>";
-                    echo "SHA1: " . htmlspecialchars($file['sha1']) . "<br>";
-                    echo "SHA256: " . htmlspecialchars($file['sha256']);
-                    echo "</td>";
-                    echo "<td>";
-                    echo "File Type: " . htmlspecialchars($file['file_type']) . "<br>";
-                    echo "File Size: " . htmlspecialchars($file['file_size']);
-                    echo "</td>";
-                    echo "<td>";
-                    foreach ($file['tags'] as $tag) {
-                        echo htmlspecialchars($tag['tag']) . "<br>";
-                    }
-                    echo "</td>";
-                    echo "<td>" . htmlspecialchars($file['upload_time']) . "</td>";
-                    echo "</tr>";
-                }
+            if (curl_errno($ch)) {
+                error_log('CURL error: ' . curl_error($ch));
+                echo "<tr><td colspan='4'>Error fetching recent files. Please check the logs for details.</td></tr>";
             } else {
-                echo "<tr><td colspan='4'>No recent files found.</td></tr>";
+                $files = json_decode($response, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    error_log('JSON decode error: ' . json_last_error_msg());
+                    echo "<tr><td colspan='4'>Error decoding response. Please check the logs for details.</td></tr>";
+                } else {
+                    if (!empty($files['files'])) {
+                        foreach ($files['files'] as $file) {
+                            echo "<tr>";
+                            echo "<td>";
+                            echo "File Name: " . htmlspecialchars($file['file_name'] ?? '') . "<br>";
+                            echo "MD5: " . htmlspecialchars($file['md5'] ?? '') . "<br>";
+                            echo "SHA1: " . htmlspecialchars($file['sha1'] ?? '') . "<br>";
+                            echo "SHA256: " . htmlspecialchars($file['sha256'] ?? '');
+                            echo "</td>";
+                            echo "<td>";
+                            echo "File Type: " . htmlspecialchars($file['file_type'] ?? '') . "<br>";
+                            echo "File Size: " . htmlspecialchars($file['file_size'] ?? '');
+                            echo "</td>";
+                            echo "<td>";
+                            if (!empty($file['tags'])) {
+                                foreach ($file['tags'] as $tag) {
+                                    echo htmlspecialchars($tag['tag'] ?? '') . "<br>";
+                                }
+                            }
+                            echo "</td>";
+                            echo "<td>" . htmlspecialchars($file['upload_time'] ?? '') . "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='4'>No recent files found.</td></tr>";
+                    }
+                }
             }
+            curl_close($ch);
             ?>
         </tbody>
     </table>
