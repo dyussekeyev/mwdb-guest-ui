@@ -52,7 +52,7 @@
             $api_key = $config['api_key'];
 
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $api_url . "/file?count=10");
+            curl_setopt($ch, CURLOPT_URL, "$api_url/file?count=10");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 "accept: application/json",
