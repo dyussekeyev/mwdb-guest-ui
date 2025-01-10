@@ -37,6 +37,11 @@ session_start();
             ];
             $context  = stream_context_create($options);
             $recaptcha_verification = file_get_contents($recaptcha_url, false, $context);
+            if ($recaptcha_verification === FALSE) {
+                error_log('reCAPTCHA verification request failed.');
+                echo "<p>reCAPTCHA verification request failed. Please try again.</p>";
+                exit;
+            }
             $recaptcha_result = json_decode($recaptcha_verification, true);
             
             if (!$recaptcha_result['success']) {
@@ -69,9 +74,20 @@ session_start();
         ]);
 
         $response = curl_exec($ch);
+        if (curl_errno($ch)) {
+            error_log('CURL error: ' . curl_error($ch));
+            echo "<p>Error fetching file. Please try again later.</p>";
+            curl_close($ch);
+            exit;
+        }
         curl_close($ch);
 
         $file = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log('JSON decode error: ' . json_last_error_msg());
+            echo "<p>Error processing response. Please try again later.</p>";
+            exit;
+        }
 
         if (isset($file['message']) && $file['message'] == 'Object not found') {
             echo "<p>File not found.</p>";
@@ -81,20 +97,20 @@ session_start();
             echo "<tr><th>Key</th><th>Value</th></tr>";
             echo "</thead>";
             echo "<tbody>";
-            echo "<tr><td>File name</td><td>" . htmlspecialchars($file['file_name']) . "</td></tr>";
+            echo "<tr><td>File name</td><td>" . htmlspecialchars($file['file_name'] ?? '') . "</td></tr>";
             if (!empty($file['alt_names'])) {
                 foreach ($file['alt_names'] as $alt_name) {
                     echo "<tr><td>Alt name</td><td>" . htmlspecialchars($alt_name) . "</td></tr>";
                 }
             }
-            echo "<tr><td>MD5</td><td>" . htmlspecialchars($file['md5']) . "</td></tr>";
-            echo "<tr><td>SHA1</td><td>" . htmlspecialchars($file['sha1']) . "</td></tr>";
-            echo "<tr><td>SHA256</td><td>" . htmlspecialchars($file['sha256']) . "</td></tr>";
-            echo "<tr><td>SHA512</td><td>" . htmlspecialchars($file['sha512']) . "</td></tr>";
-            echo "<tr><td>CRC32</td><td>" . htmlspecialchars($file['crc32']) . "</td></tr>";
-            echo "<tr><td>ssdeep</td><td>" . htmlspecialchars($file['ssdeep']) . "</td></tr>";
-            echo "<tr><td>File type</td><td>" . htmlspecialchars($file['file_type']) . "</td></tr>";
-            echo "<tr><td>File size</td><td>" . htmlspecialchars($file['file_size']) . "</td></tr>";
+            echo "<tr><td>MD5</td><td>" . htmlspecialchars($file['md5'] ?? '') . "</td></tr>";
+            echo "<tr><td>SHA1</td><td>" . htmlspecialchars($file['sha1'] ?? '') . "</td></tr>";
+            echo "<tr><td>SHA256</td><td>" . htmlspecialchars($file['sha256'] ?? '') . "</td></tr>";
+            echo "<tr><td>SHA512</td><td>" . htmlspecialchars($file['sha512'] ?? '') . "</td></tr>";
+            echo "<tr><td>CRC32</td><td>" . htmlspecialchars($file['crc32'] ?? '') . "</td></tr>";
+            echo "<tr><td>ssdeep</td><td>" . htmlspecialchars($file['ssdeep'] ?? '') . "</td></tr>";
+            echo "<tr><td>File type</td><td>" . htmlspecialchars($file['file_type'] ?? '') . "</td></tr>";
+            echo "<tr><td>File size</td><td>" . htmlspecialchars($file['file_size'] ?? '') . "</td></tr>";
             echo "</tbody>";
             echo "</table>";
         }
