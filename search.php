@@ -61,7 +61,7 @@ session_start();
 
         // Perform the search request
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://mwdb.cert.pl/api/file/$hash_value");
+        curl_setopt($ch, CURLOPT_URL, "$api_url/file/$hash_value");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "accept: application/json",
