@@ -56,6 +56,7 @@ session_start();
         }
         
         // Load API key from configuration
+        $api_url = $config['api_url'];
         $api_key = $config['api_key'];
 
         // Perform the search request
