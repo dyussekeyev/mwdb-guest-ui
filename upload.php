@@ -19,6 +19,7 @@ session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!isset($_POST['upload_csrf_token']) || $_POST['upload_csrf_token'] !== $_SESSION['csrf_token']) {
                 echo "<p>Invalid CSRF token. Please try again.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
 
@@ -44,12 +45,14 @@ session_start();
                 if ($recaptcha_verification === FALSE) {
                     error_log('reCAPTCHA verification request failed.');
                     echo "<p>reCAPTCHA verification request failed. Please try again.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
                 $recaptcha_result = json_decode($recaptcha_verification, true);
                 
                 if (!$recaptcha_result['success']) {
                     echo "<p>reCAPTCHA verification failed. Please try again.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
             } elseif ($config['captcha_type'] === 'custom' && isset($_POST['upload_captcha_input'])) {
@@ -57,10 +60,12 @@ session_start();
                 
                 if ($captcha_input !== $_SESSION['captcha_text_upload']) {
                     echo "<p>Incorrect captcha. Please try again.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
             } else {
                 echo "<p>No captcha input provided. Please try again.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
 
@@ -89,6 +94,7 @@ session_start();
                 if (curl_errno($ch)) {
                     error_log('CURL error: ' . curl_error($ch));
                     echo "<p>Error uploading file. Please try again later.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     curl_close($ch);
                     exit;
                 }
@@ -98,6 +104,7 @@ session_start();
     
                 if ($http_code !== 200) {
                     echo "<p>Error uploading file. HTTP code: $http_code</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
 
@@ -105,10 +112,12 @@ session_start();
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     error_log('JSON decode error: ' . json_last_error_msg());
                     echo "<p>Error processing response. Please try again later.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
             } else {
                 echo "<p>No file uploaded or there was an upload error.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
             }
         }
 
@@ -131,7 +140,7 @@ session_start();
             echo "</table>";
         }
         ?>
-        <a href="index.php">Go back</a>
+        <a href="index.php" style="font-size:20px;">Go back</a>
     </div>
 </body>
 </html>
