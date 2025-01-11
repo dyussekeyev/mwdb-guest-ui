@@ -106,3 +106,26 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+.tab {
+    display: none;
+}
+
+.tab.active {
+    display: block;
+}
+
+.tab-buttons {
+    display: flex;
+    cursor: pointer;
+}
+
+.tab-buttons div {
+    padding: 10px;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+}
+
+.tab-buttons div.active {
+    background-color: #ddd;
+}
