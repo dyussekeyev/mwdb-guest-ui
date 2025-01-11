@@ -16,7 +16,7 @@ session_start();
     $config = require 'config.php';
 
     if (isset($_GET['hash_value'])) {
-        if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+        if (!isset($_GET['search_csrf_token']) || $_GET['search_csrf_token'] !== $_SESSION['csrf_token']) {
             echo "<p>Invalid CSRF token. Please try again.</p>";
             exit;
         }
@@ -57,8 +57,8 @@ session_start();
                 echo "<p>reCAPTCHA verification failed. Please try again.</p>";
                 exit;
             }
-        } elseif ($config['captcha_type'] === 'custom' && isset($_GET['captcha_input'])) {
-            $captcha_input = filter_input(INPUT_GET, 'captcha_input', FILTER_SANITIZE_STRING);
+        } elseif ($config['captcha_type'] === 'custom' && isset($_GET['search_captcha_input'])) {
+            $captcha_input = filter_input(INPUT_GET, 'search_captcha_input', FILTER_SANITIZE_STRING);
             
             if ($captcha_input !== $_SESSION['captcha_text']) {
                 echo "<p>Incorrect captcha. Please try again.</p>";
