@@ -89,9 +89,14 @@ if (empty($_SESSION['csrf_token'])) {
                 ]);
     
                 $response = curl_exec($ch);
+                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
                 if (curl_errno($ch)) {
                     error_log('CURL error: ' . curl_error($ch));
                     echo "<tr><td colspan='4'>Error fetching recent files. Please check the logs for details.</td></tr>";
+                } elseif ($http_code !== 200) {
+                    echo "<tr><td colspan='4'>Error fetching recent files. HTTP code: $http_code</td></tr>";
                 } else {
                     $files = json_decode($response, true);
                     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -126,7 +131,6 @@ if (empty($_SESSION['csrf_token'])) {
                         }
                     }
                 }
-                curl_close($ch);
                 ?>
             </tbody>
         </table>
