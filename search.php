@@ -16,6 +16,11 @@ session_start();
     $config = require 'config.php';
 
     if (isset($_GET['hash_value'])) {
+        if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+            echo "<p>Invalid CSRF token. Please try again.</p>";
+            exit;
+        }
+
         $hash_value = filter_input(INPUT_GET, 'hash_value', FILTER_SANITIZE_STRING);
         if (empty($hash_value)) {
             echo "<p>Invalid hash value provided. Please try again.</p>";
