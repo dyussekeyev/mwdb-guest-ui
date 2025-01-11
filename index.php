@@ -1,3 +1,9 @@
+<?php
+session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,9 +36,10 @@
             <input type="text" id="captcha_input" name="captcha_input" required><br><br>
         <?php endif; ?>
         
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
         <button type="submit">Search</button>
     </form>
-
+    
     <h2>Recent files</h2>
     
     <!-- Recent Files Table -->
