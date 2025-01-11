@@ -60,7 +60,7 @@ session_start();
         } elseif ($config['captcha_type'] === 'custom' && isset($_GET['search_captcha_input'])) {
             $captcha_input = filter_input(INPUT_GET, 'search_captcha_input', FILTER_SANITIZE_STRING);
             
-            if ($captcha_input !== $_SESSION['captcha_text']) {
+            if ($captcha_input !== $_SESSION['captcha_text_search']) {
                 echo "<p>Incorrect captcha. Please try again.</p>";
                 exit;
             }
