@@ -45,7 +45,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit">Search</button>
+                <button type="submit" style="height:50px; width:150px">Search</button>
             </form>
         </div>
         
@@ -66,7 +66,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit">Upload</button>
+                <button type="submit" style="height:50px; width:150px">Upload</button>
             </form>
         </div>
         
