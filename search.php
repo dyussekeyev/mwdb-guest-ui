@@ -16,10 +16,14 @@ session_start();
     $config = require 'config.php';
 
     if (isset($_GET['hash_value'])) {
-        $hash_value = htmlspecialchars($_GET['hash_value']);
+        $hash_value = filter_input(INPUT_GET, 'hash_value', FILTER_SANITIZE_STRING);
+        if (empty($hash_value)) {
+            echo "<p>Invalid hash value provided. Please try again.</p>";
+            exit;
+        }
 
         if ($config['captcha_type'] === 'recaptcha' && isset($_GET['g-recaptcha-response'])) {
-            $recaptcha_response = $_GET['g-recaptcha-response'];
+            $recaptcha_response = filter_input(INPUT_GET, 'g-recaptcha-response', FILTER_SANITIZE_STRING);
             $secret_key = $config['recaptcha_secret_key'];
             
             // Verify reCAPTCHA
@@ -49,7 +53,7 @@ session_start();
                 exit;
             }
         } elseif ($config['captcha_type'] === 'custom' && isset($_GET['captcha_input'])) {
-            $captcha_input = htmlspecialchars($_GET['captcha_input']);
+            $captcha_input = filter_input(INPUT_GET, 'captcha_input', FILTER_SANITIZE_STRING);
             
             if ($captcha_input !== $_SESSION['captcha_text']) {
                 echo "<p>Incorrect captcha. Please try again.</p>";
