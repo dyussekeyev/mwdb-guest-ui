@@ -110,22 +110,21 @@ a:hover {
 .tab {
     display: none;
 }
-
 .tab.active {
     display: block;
 }
-
 .tab-buttons {
     display: flex;
-    cursor: pointer;
+    justify-content: center;
+    margin-bottom: 20px;
 }
-
 .tab-buttons div {
-    padding: 10px;
+    padding: 15px;
     background-color: #f1f1f1;
     border: 1px solid #ccc;
+    width: 150%;
+    text-align: center;
 }
-
 .tab-buttons div.active {
     background-color: #ddd;
 }
