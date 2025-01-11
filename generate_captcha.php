@@ -31,6 +31,12 @@ if ($text_color === false) {
     imagedestroy($image);
     exit('Failed to allocate text color.');
 }
+$border_color = imagecolorallocate($image, 0, 0, 0); // Black border color
+if ($border_color === false) {
+    error_log('Failed to allocate border color.');
+    imagedestroy($image);
+    exit('Failed to allocate border color.');
+}
 $font = 5; // Default font size
 $font_width = imagefontwidth($font);
 $font_height = imagefontheight($font);
@@ -44,6 +50,13 @@ if (!imagestring($image, $font, $x, $y, $captcha_text, $text_color)) {
     error_log('Failed to draw text on image.');
     imagedestroy($image);
     exit('Failed to draw text on image.');
+}
+
+// Draw the border around the image
+if (!imagerectangle($image, 0, 0, imagesx($image) - 1, imagesy($image) - 1, $border_color)) {
+    error_log('Failed to draw border on image.');
+    imagedestroy($image);
+    exit('Failed to draw border on image.');
 }
 
 // Set headers and output the image
