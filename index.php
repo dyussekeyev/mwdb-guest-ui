@@ -9,7 +9,7 @@ if (empty($_SESSION['csrf_token'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Management</title>
+    <title>Malware Database</title>
     <link rel="stylesheet" href="styles.css">
     <?php
     $config = require 'config.php';
