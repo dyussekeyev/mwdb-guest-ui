@@ -15,7 +15,7 @@ session_start();
         
         <?php
         $config = require 'config.php';
-    
+
         if (!isset($_GET['hash_value'])) {
             echo "<p>No hash value provided. Please try again.</p>";
             echo '<a href="index.php" style="font-size:20px;">Go back</a>';
@@ -145,6 +145,59 @@ session_start();
             echo "<tr><td>File size</td><td>" . htmlspecialchars($file['file_size'] ?? '') . "</td></tr>";
             echo "</tbody>";
             echo "</table>";
+        }
+
+        // Perform the comments request
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "$api_url/file/$hash_value/comment");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "accept: application/json",
+            "Authorization: Bearer $api_key"
+        ]);
+
+        $comments_response = curl_exec($ch);
+        if (curl_errno($ch)) {
+            error_log('CURL error: ' . curl_error($ch));
+            echo "<p>Error fetching comments. Please try again later.</p>";
+            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+            curl_close($ch);
+            exit;
+        }
+
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200) {
+            echo "<p>Error fetching comments. HTTP code: $http_code</p>";
+            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+            exit;
+        }
+
+        $comments = json_decode($comments_response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log('JSON decode error: ' . json_last_error_msg());
+            echo "<p>Error processing comments response. Please try again later.</p>";
+            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+            exit;
+        }
+
+        if (!empty($comments)) {
+            echo "<table border='1' style='width:100%; margin-top:20px;'>";
+            echo "<thead>";
+            echo "<tr><th style='width:25%;'>Author and Date</th><th style='width:75%;'>Comment</th></tr>";
+            echo "</thead>";
+            echo "<tbody>";
+            foreach ($comments as $comment) {
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($comment['author']) . "<br>" . htmlspecialchars($comment['timestamp']) . "</td>";
+                echo "<td>" . nl2br(htmlspecialchars($comment['comment'])) . "</td>";
+                echo "</tr>";
+            }
+            echo "</tbody>";
+            echo "</table>";
+        } else {
+            echo "<p>No comments found.</p>";
         }
         ?>
         <a href="index.php" style="font-size:20px;">Go back</a>
