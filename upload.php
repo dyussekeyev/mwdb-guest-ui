@@ -92,7 +92,14 @@ session_start();
                     curl_close($ch);
                     exit;
                 }
+                
+                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
+    
+                if ($http_code !== 200) {
+                    echo "<p>Error uploading file. HTTP code: $http_code</p>";
+                    exit;
+                }
 
                 $response_data = json_decode($response, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
