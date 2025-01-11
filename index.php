@@ -32,7 +32,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
             <?php else: ?>
                 <!-- Custom CAPTCHA -->
-                <img src="generate_captcha.php?<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
+                <img src="generate_captcha.php?type=search&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
                 <label for="search_captcha_input">Enter Captcha:</label>
                 <input type="text" id="search_captcha_input" name="search_captcha_input" required><br><br>
             <?php endif; ?>
@@ -53,7 +53,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
             <?php else: ?>
                 <!-- Custom CAPTCHA -->
-                <img src="generate_captcha.php?<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
+                <img src="generate_captcha.php?type=upload&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
                 <label for="upload_captcha_input">Enter Captcha:</label>
                 <input type="text" id="upload_captcha_input" name="upload_captcha_input" required><br><br>
             <?php endif; ?>
