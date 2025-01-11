@@ -33,11 +33,11 @@ if (empty($_SESSION['csrf_token'])) {
             <?php else: ?>
                 <!-- Custom CAPTCHA -->
                 <img src="generate_captcha.php?<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
-                <label for="captcha_input">Enter Captcha:</label>
-                <input type="text" id="captcha_input" name="captcha_input" required><br><br>
+                <label for="search_captcha_input">Enter Captcha:</label>
+                <input type="text" id="search_captcha_input" name="search_captcha_input" required><br><br>
             <?php endif; ?>
             
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+            <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <button type="submit">Search</button>
         </form>
 
@@ -54,11 +54,11 @@ if (empty($_SESSION['csrf_token'])) {
             <?php else: ?>
                 <!-- Custom CAPTCHA -->
                 <img src="generate_captcha.php?<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
-                <label for="captcha_input">Enter Captcha:</label>
-                <input type="text" id="captcha_input" name="captcha_input" required><br><br>
+                <label for="upload_captcha_input">Enter Captcha:</label>
+                <input type="text" id="upload_captcha_input" name="upload_captcha_input" required><br><br>
             <?php endif; ?>
             
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+            <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <button type="submit">Upload</button>
         </form>
         
