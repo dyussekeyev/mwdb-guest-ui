@@ -39,6 +39,27 @@ if (empty($_SESSION['csrf_token'])) {
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
         <button type="submit">Search</button>
     </form>
+
+    <h1>File Upload</h1>
+
+    <!-- Upload Form -->
+    <form action="upload.php" method="post" enctype="multipart/form-data">
+        <label for="file">Choose file:</label>
+        <input type="file" id="file" name="file" required><br><br>
+        
+        <?php if ($config['captcha_type'] === 'recaptcha'): ?>
+            <!-- Google reCAPTCHA -->
+            <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
+        <?php else: ?>
+            <!-- Custom CAPTCHA -->
+            <img src="generate_captcha.php?<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
+            <label for="captcha_input">Enter Captcha:</label>
+            <input type="text" id="captcha_input" name="captcha_input" required><br><br>
+        <?php endif; ?>
+        
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+        <button type="submit">Upload</button>
+    </form>
     
     <h2>Recent files</h2>
     
