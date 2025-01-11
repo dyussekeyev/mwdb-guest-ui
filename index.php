@@ -9,7 +9,7 @@ if (empty($_SESSION['csrf_token'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Search</title>
+    <title>File Management</title>
     <link rel="stylesheet" href="styles.css">
     <?php
     $config = require 'config.php';
@@ -17,50 +17,60 @@ if (empty($_SESSION['csrf_token'])) {
         echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
     }
     ?>
+    <script src="scripts.js"></script>
 </head>
-<body>
+<body onload="showTab('file-search')">
     <div class="container">
-        <h1>File Search</h1>
+        <h1>File Management</h1>
+        
+        <div class="tab-buttons">
+            <div id="file-search-button" onclick="showTab('file-search')">File Search</div>
+            <div id="file-upload-button" onclick="showTab('file-upload')">File Upload</div>
+        </div>
         
         <!-- Search Form -->
-        <form action="search.php" method="get">
-            <label for="hash_value">Enter Hash:</label>
-            <input type="text" id="hash_value" name="hash_value" size="150" maxlength="150" required><br><br>
-            
-            <?php if ($config['captcha_type'] === 'recaptcha'): ?>
-                <!-- Google reCAPTCHA -->
-                <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
-            <?php else: ?>
-                <!-- Custom CAPTCHA -->
-                <img src="generate_captcha.php?type=search&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
-                <label for="search_captcha_input">Enter Captcha:</label>
-                <input type="text" id="search_captcha_input" name="search_captcha_input" required><br><br>
-            <?php endif; ?>
-            
-            <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-            <button type="submit">Search</button>
-        </form>
-
-        <h1>File Upload</h1>
-    
+        <div id="file-search" class="tab">
+            <h2>File Search</h2>
+            <form action="search.php" method="get">
+                <label for="hash_value">Enter Hash:</label>
+                <input type="text" id="hash_value" name="hash_value" size="150" maxlength="150" required><br><br>
+                
+                <?php if ($config['captcha_type'] === 'recaptcha'): ?>
+                    <!-- Google reCAPTCHA -->
+                    <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
+                <?php else: ?>
+                    <!-- Custom CAPTCHA -->
+                    <img src="generate_captcha.php?type=search&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
+                    <label for="search_captcha_input">Enter Captcha:</label>
+                    <input type="text" id="search_captcha_input" name="search_captcha_input" required><br><br>
+                <?php endif; ?>
+                
+                <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        
         <!-- Upload Form -->
-        <form action="upload.php" method="post" enctype="multipart/form-data">
-            <label for="file">Choose file:</label>
-            <input type="file" id="file" name="file" required><br><br>
-            
-            <?php if ($config['captcha_type'] === 'recaptcha'): ?>
-                <!-- Google reCAPTCHA -->
-                <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
-            <?php else: ?>
-                <!-- Custom CAPTCHA -->
-                <img src="generate_captcha.php?type=upload&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
-                <label for="upload_captcha_input">Enter Captcha:</label>
-                <input type="text" id="upload_captcha_input" name="upload_captcha_input" required><br><br>
-            <?php endif; ?>
-            
-            <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-            <button type="submit">Upload</button>
-        </form>
+        <div id="file-upload" class="tab">
+            <h2>File Upload</h2>
+            <form action="upload.php" method="post" enctype="multipart/form-data">
+                <label for="file">Choose file:</label>
+                <input type="file" id="file" name="file" required><br><br>
+                
+                <?php if ($config['captcha_type'] === 'recaptcha'): ?>
+                    <!-- Google reCAPTCHA -->
+                    <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
+                <?php else: ?>
+                    <!-- Custom CAPTCHA -->
+                    <img src="generate_captcha.php?type=upload&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
+                    <label for="upload_captcha_input">Enter Captcha:</label>
+                    <input type="text" id="upload_captcha_input" name="upload_captcha_input" required><br><br>
+                <?php endif; ?>
+                
+                <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <button type="submit">Upload</button>
+            </form>
+        </div>
         
         <h2>Recent files</h2>
         
