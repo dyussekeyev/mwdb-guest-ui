@@ -80,9 +80,7 @@ form input[type="file"] {
     font-size: 1em;
 }
 
-form input[type="submit"],
-form button[type="submit"] {
-    width: 150%;
+form input[type="submit"] {
     background-color: #007bff;
     color: white;
     border: none;
@@ -90,8 +88,7 @@ form button[type="submit"] {
     transition: background-color 0.3s ease;
 }
 
-form input[type="submit"]:hover,
-form button[type="submit"]:hover {
+form input[type="submit"]:hover {
     background-color: #0056b3;
 }
 
