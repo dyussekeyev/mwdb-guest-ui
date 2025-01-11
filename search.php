@@ -19,12 +19,14 @@ session_start();
         if (isset($_GET['hash_value'])) {
             if (!isset($_GET['search_csrf_token']) || $_GET['search_csrf_token'] !== $_SESSION['csrf_token']) {
                 echo "<p>Invalid CSRF token. Please try again.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
     
             $hash_value = filter_input(INPUT_GET, 'hash_value', FILTER_SANITIZE_STRING);
             if (empty($hash_value)) {
                 echo "<p>Invalid hash value provided. Please try again.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
     
@@ -50,12 +52,14 @@ session_start();
                 if ($recaptcha_verification === FALSE) {
                     error_log('reCAPTCHA verification request failed.');
                     echo "<p>reCAPTCHA verification request failed. Please try again.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
                 $recaptcha_result = json_decode($recaptcha_verification, true);
                 
                 if (!$recaptcha_result['success']) {
                     echo "<p>reCAPTCHA verification failed. Please try again.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
             } elseif ($config['captcha_type'] === 'custom' && isset($_GET['search_captcha_input'])) {
@@ -63,10 +67,12 @@ session_start();
                 
                 if ($captcha_input !== $_SESSION['captcha_text_search']) {
                     echo "<p>Incorrect captcha. Please try again.</p>";
+                    echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                     exit;
                 }
             } else {
                 echo "<p>No captcha input provided. Please try again.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
             
@@ -87,6 +93,7 @@ session_start();
             if (curl_errno($ch)) {
                 error_log('CURL error: ' . curl_error($ch));
                 echo "<p>Error fetching file. Please try again later.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 curl_close($ch);
                 exit;
             }
@@ -96,6 +103,7 @@ session_start();
     
             if ($http_code !== 200) {
                 echo "<p>Error fetching file. HTTP code: $http_code</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
     
@@ -103,11 +111,13 @@ session_start();
             if (json_last_error() !== JSON_ERROR_NONE) {
                 error_log('JSON decode error: ' . json_last_error_msg());
                 echo "<p>Error processing response. Please try again later.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
     
             if (isset($file['message']) && $file['message'] == 'Object not found') {
                 echo "<p>File not found.</p>";
+                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
             } else {
                 echo "<table border='1'>";
                 echo "<thead>";
@@ -133,10 +143,9 @@ session_start();
             }
         } else {
             echo "<p>No hash value provided. Please try again.</p>";
+            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
         }
         ?>
-        
-        <a href="index.php">Go back</a>
     </div>
 </body>
 </html>
