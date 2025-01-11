@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($config['captcha_type'] === 'custom' && isset($_POST['upload_captcha_input'])) {
         $captcha_input = filter_input(INPUT_POST, 'upload_captcha_input', FILTER_SANITIZE_STRING);
         
-        if ($captcha_input !== $_SESSION['captcha_text']) {
+        if ($captcha_input !== $_SESSION['captcha_text_upload']) {
             echo "<p>Incorrect captcha. Please try again.</p>";
             exit;
         }
@@ -115,6 +115,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "<p>No file uploaded or there was an upload error.</p>";
     }
 } else {
-    echo "<p>Invalid request method.</p>";
-}
-?>
+    echo "<p>Invalid request method.</
