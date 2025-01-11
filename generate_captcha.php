@@ -1,11 +1,14 @@
 <?php
 session_start();
 
+// Determine the captcha type based on the query parameter
+$captcha_type = isset($_GET['type']) ? $_GET['type'] : 'search';
+
 // Generate a random string
 $captcha_text = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 6);
 
-// Store the captcha text in the session
-$_SESSION['captcha_text'] = $captcha_text;
+// Store the captcha text in the session with different keys based on the type
+$_SESSION["captcha_text_$captcha_type"] = $captcha_text;
 
 // Create the image
 $image = imagecreate(100, 40);
