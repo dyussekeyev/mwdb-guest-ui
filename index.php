@@ -30,7 +30,6 @@ if (empty($_SESSION['csrf_token'])) {
         
         <!-- Search Form -->
         <div id="file-search" class="tab">
-            <h2>File Search</h2>
             <form action="search.php" method="get">
                 <label for="hash_value">Enter Hash:</label>
                 <input type="text" id="hash_value" name="hash_value" size="150" maxlength="150" required><br><br>
@@ -52,7 +51,6 @@ if (empty($_SESSION['csrf_token'])) {
         
         <!-- Upload Form -->
         <div id="file-upload" class="tab">
-            <h2>File Upload</h2>
             <form action="upload.php" method="post" enctype="multipart/form-data">
                 <label for="file">Choose file:</label>
                 <input type="file" id="file" name="file" required><br><br>
