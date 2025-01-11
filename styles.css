@@ -126,5 +126,6 @@ a:hover {
     text-align: center;
 }
 .tab-buttons div.active {
-    background-color: #ddd;
+    background-color: #007bff;
+    color: white;
 }
