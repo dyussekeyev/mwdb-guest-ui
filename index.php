@@ -115,7 +115,11 @@ if (empty($_SESSION['csrf_token'])) {
                             foreach ($files['files'] as $file) {
                                 echo "<tr>";
                                 echo "<td>";
-                                echo "File Name: " . htmlspecialchars($file['file_name'] ?? '') . "<br>";
+                                $file_name = htmlspecialchars($file['file_name'] ?? '');
+                                if (strlen($file_name) > 30) {
+                                    $file_name = substr($file_name, 0, 30) . '...';
+                                }
+                                echo "File Name: " . $file_name . "<br>";
                                 echo "MD5: " . htmlspecialchars($file['md5'] ?? '') . "<br>";
                                 echo "SHA1: " . htmlspecialchars($file['sha1'] ?? '') . "<br>";
                                 echo "SHA256: " . htmlspecialchars($file['sha256'] ?? '');
