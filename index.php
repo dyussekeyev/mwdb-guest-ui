@@ -21,7 +21,7 @@ if (empty($_SESSION['csrf_token'])) {
 </head>
 <body onload="showTab('file-search')">
     <div class="container">
-        <h1>File Management</h1>
+        <h1>Malware Database</h1>
         
         <div class="tab-buttons">
             <div id="file-search-button" onclick="showTab('file-search')">File Search</div>
@@ -117,7 +117,7 @@ if (empty($_SESSION['csrf_token'])) {
                                 echo "<td>";
                                 $file_name = htmlspecialchars($file['file_name'] ?? '');
                                 if (strlen($file_name) > 30) {
-                                    $file_name = substr($file_name, 0, 30) . '[...]';
+                                    $file_name = substr($file_name, 0, 60) . '[...]';
                                 }
                                 echo "File Name: " . $file_name . "<br>";
                                 echo "MD5: " . htmlspecialchars($file['md5'] ?? '') . "<br>";
