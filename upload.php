@@ -16,7 +16,7 @@ session_start();
         <?php
         $config = require 'config.php';
 
-		if (!isset($_FILES['file']) || $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+		if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK)
 			echo "<p>No file uploaded or there was an upload error.</p>";
 			echo '<a href="index.php" style="font-size:20px;">Go back</a>';
 		}
