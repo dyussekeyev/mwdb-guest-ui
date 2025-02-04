@@ -38,6 +38,8 @@ table {
 
 table, th, td {
     border: 1px solid #ddd;
+    word-break: break-all; /* This will break long words at any point */
+    overflow-wrap: anywhere; /* This will break long words at any point */
 }
 
 th, td {
