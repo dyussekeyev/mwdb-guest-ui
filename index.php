@@ -14,7 +14,7 @@ if (empty($_SESSION['csrf_token'])) {
     <?php
     $config = require 'config.php';
     if ($config['captcha_type'] === 'recaptcha') {
-        echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
+        echo '<script src="https://www.google.com/recaptcha/api.js?render=' . htmlspecialchars($config['recaptcha_site_key']) . '"></script>';
     }
     ?>
     <script src="scripts.js"></script>
@@ -30,13 +30,12 @@ if (empty($_SESSION['csrf_token'])) {
         
         <!-- Search Form -->
         <div id="file-search" class="tab">
-            <form action="search.php" method="get">
+            <form id="search-form" action="search.php" method="get">
                 <label for="hash_value">Enter Hash:</label>
                 <input type="text" id="hash_value" name="hash_value" size="150" maxlength="150" required><br><br>
                 
                 <?php if ($config['captcha_type'] === 'recaptcha'): ?>
-                    <!-- Google reCAPTCHA -->
-                    <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
+                    <input type="hidden" id="recaptcha_token" name="recaptcha_token">
                 <?php else: ?>
                     <!-- Custom CAPTCHA -->
                     <img src="generate_captcha.php?type=search&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
@@ -45,19 +44,18 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px">Search</button>
+                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'search')">Search</button>
             </form>
         </div>
         
         <!-- Upload Form -->
         <div id="file-upload" class="tab">
-            <form action="upload.php" method="post" enctype="multipart/form-data">
+            <form id="upload-form" action="upload.php" method="post" enctype="multipart/form-data">
                 <label for="file">Choose file:</label>
                 <input type="file" id="file" name="file" required><br><br>
                 
                 <?php if ($config['captcha_type'] === 'recaptcha'): ?>
-                    <!-- Google reCAPTCHA -->
-                    <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>"></div>
+                    <input type="hidden" id="recaptcha_token" name="recaptcha_token">
                 <?php else: ?>
                     <!-- Custom CAPTCHA -->
                     <img src="generate_captcha.php?type=upload&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
@@ -66,7 +64,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px">Upload</button>
+                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'upload')">Upload</button>
             </form>
         </div>
         
@@ -147,5 +145,20 @@ if (empty($_SESSION['csrf_token'])) {
             </tbody>
         </table>
     </div>
+    <script>
+        function executeRecaptcha(event, action) {
+            event.preventDefault();
+            grecaptcha.ready(function() {
+                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: action}).then(function(token) {
+                    document.getElementById('recaptcha_token').value = token;
+                    if (action === 'search') {
+                        document.getElementById('search-form').submit();
+                    } else if (action === 'upload') {
+                        document.getElementById('upload-form').submit();
+                    }
+                });
+            });
+        }
+    </script>
 </body>
 </html>
