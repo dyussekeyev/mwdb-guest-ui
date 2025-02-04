@@ -35,15 +35,15 @@ session_start();
             exit;
         }
 
-        if ($config['captcha_type'] === 'recaptcha' && isset($_GET['g-recaptcha-response'])) {
-            $recaptcha_response = filter_input(INPUT_GET, 'g-recaptcha-response', FILTER_SANITIZE_STRING);
+        if ($config['captcha_type'] === 'recaptcha' && isset($_GET['recaptcha_token'])) {
+            $recaptcha_token = filter_input(INPUT_GET, 'recaptcha_token', FILTER_SANITIZE_STRING);
             $secret_key = $config['recaptcha_secret_key'];
             
             // Verify reCAPTCHA
             $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
             $recaptcha_data = [
                 'secret' => $secret_key,
-                'response' => $recaptcha_response
+                'response' => $recaptcha_token
             ];
             $options = [
                 'http' => [
