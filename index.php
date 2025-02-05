@@ -133,7 +133,9 @@ if (empty($_SESSION['csrf_token'])) {
                                     }
                                 }
                                 echo "</td>";
-                                echo "<td>" . htmlspecialchars($file['upload_time'] ?? '') . "</td>";
+                                $upload_time = htmlspecialchars($file['upload_time'] ?? '');
+                                $formatted_time = date("H:i:s d.m.Y", strtotime($upload_time));
+                                echo "<td>" . $formatted_time . "</td>";
                                 echo "</tr>";
                             }
                         } else {
