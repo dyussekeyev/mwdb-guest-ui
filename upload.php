@@ -8,12 +8,6 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Result</title>
     <link rel="stylesheet" href="styles.css">
-    <?php
-    $config = require 'config.php';
-    if ($config['captcha_type'] === 'recaptcha') {
-        echo '<script src="https://www.google.com/recaptcha/api.js?render=' . htmlspecialchars($config['recaptcha_site_key']) . '"></script>';
-    }
-    ?>
 </head>
 <body>
     <div class="container">
@@ -147,19 +141,5 @@ session_start();
         ?>
         <a href="index.php" style="font-size:20px;">Go back</a>
     </div>
-    <script>
-        function executeRecaptcha(action) {
-            grecaptcha.ready(function() {
-                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: action}).then(function(token) {
-                    document.getElementById('recaptcha_token').value = token;
-                });
-            });
-        }
-        document.getElementById('upload-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            executeRecaptcha('upload');
-            this.submit();
-        });
-    </script>
 </body>
 </html>
