@@ -131,7 +131,7 @@ a:hover {
 }
 
 /* Применить перенос слов только к определенным столбцам */
-.table-column-name, .table-column-tags {
+.table-column-type, .table-column-tags {
     word-break: break-all; /* Разбивать длинные слова в любом месте */
     overflow-wrap: anywhere; /* Разбивать длинные слова в любом месте */
 }
