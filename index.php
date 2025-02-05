@@ -112,7 +112,7 @@ if (empty($_SESSION['csrf_token'])) {
                         if (!empty($files['files'])) {
                             foreach ($files['files'] as $file) {
                                 echo "<tr>";
-                                echo "<td class='table-column-name'>";
+                                echo "<td>";
                                 $file_name = htmlspecialchars($file['file_name'] ?? '');
                                 if (strlen($file_name) > 30) {
                                     $file_name = substr($file_name, 0, 60) . '[...]';
@@ -122,7 +122,7 @@ if (empty($_SESSION['csrf_token'])) {
                                 echo "SHA1: " . htmlspecialchars($file['sha1'] ?? '') . "<br>";
                                 echo "SHA256: " . htmlspecialchars($file['sha256'] ?? '');
                                 echo "</td>";
-                                echo "<td>";
+                                echo "<td class='table-column-type'>";
                                 echo "File Type: " . htmlspecialchars($file['file_type'] ?? '') . "<br>";
                                 echo "File Size: " . htmlspecialchars($file['file_size'] ?? '');
                                 echo "</td>";
