@@ -38,8 +38,6 @@ table {
 
 table, th, td {
     border: 1px solid #ddd;
-    word-break: break-all; /* This will break long words at any point */
-    overflow-wrap: anywhere; /* This will break long words at any point */
 }
 
 th, td {
@@ -130,4 +128,10 @@ a:hover {
 .tab-buttons div.active {
     background-color: #007bff;
     color: white;
+}
+
+/* Применить перенос слов только к определенным столбцам */
+.table-column-name, .table-column-tags {
+    word-break: break-all; /* Разбивать длинные слова в любом месте */
+    overflow-wrap: anywhere; /* Разбивать длинные слова в любом месте */
 }
