@@ -35,7 +35,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <input type="text" id="hash_value" name="hash_value" size="150" maxlength="150" required><br><br>
                 
                 <?php if ($config['captcha_type'] === 'recaptcha'): ?>
-                    <input type="hidden" id="recaptcha_token" name="recaptcha_token">
+                    <input type="hidden" id="recaptcha_token" name="recaptcha_token_search">
                 <?php else: ?>
                     <!-- Custom CAPTCHA -->
                     <img src="generate_captcha.php?type=search&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
@@ -44,7 +44,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptchaSearch()">Search</button>
+                <button type="submit" style="height:50px; width:150px"">Search</button>
             </form>
         </div>
         
@@ -55,7 +55,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <input type="file" id="file" name="file" required><br><br>
                 
                 <?php if ($config['captcha_type'] === 'recaptcha'): ?>
-                    <input type="hidden" id="recaptcha_token" name="recaptcha_token">
+                    <input type="hidden" id="recaptcha_token" name="recaptcha_token_upload">
                 <?php else: ?>
                     <!-- Custom CAPTCHA -->
                     <img src="generate_captcha.php?type=upload&<?php echo uniqid(); ?>" alt="CAPTCHA Image"><br><br>
@@ -64,7 +64,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptchaUpload()">Upload</button>
+                <button type="submit" style="height:50px; width:150px"">Upload</button>
             </form>
         </div>
         
@@ -148,19 +148,18 @@ if (empty($_SESSION['csrf_token'])) {
         </table>
     </div>
     <script>
-    function executeRecaptchaActions() {
-        grecaptcha.ready(function() {
-            grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: 'combined'}).then(function(token) {
-                console.log(token);
-                document.getElementById('recaptcha_token').value = token;
-                document.getElementById('search-form').submit();
-                document.getElementById('upload-form').submit();
+        function executeRecaptcha() {
+            grecaptcha.ready(function() {
+                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: 'combined'}).then(function(token) {
+                    console.log(token);
+                    document.getElementById('recaptcha_token_search').value = token;
+                    document.getElementById('recaptcha_token_upload').value = token;
+                });
             });
-        });
-    }
+        }
     
     window.onload = function() {
-        executeRecaptchaActions();
+        executeRecaptcha();
     };
     </script>
 </body>
