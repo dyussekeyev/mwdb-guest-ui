@@ -148,25 +148,20 @@ if (empty($_SESSION['csrf_token'])) {
         </table>
     </div>
     <script>
-        function executeRecaptchaSearch() {
-            grecaptcha.ready(function() {
-                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: 'search'}).then(function(token) {
-                    console.log(token);
-                    document.getElementById('recaptcha_token').value = token;
-                    document.getElementById('search-form').submit();
-                });
+    function executeRecaptchaActions() {
+        grecaptcha.ready(function() {
+            grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: 'combined'}).then(function(token) {
+                console.log(token);
+                document.getElementById('recaptcha_token').value = token;
+                document.getElementById('search-form').submit();
+                document.getElementById('upload-form').submit();
             });
-        }
-
-        function executeRecaptchaUpload() {
-            grecaptcha.ready(function() {
-                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: 'upload'}).then(function(token) {
-                    console.log(token);
-                    document.getElementById('recaptcha_token').value = token;
-                    document.getElementById('upload-form').submit();
-                });
-            });
-        }
+        });
+    }
+    
+    window.onload = function() {
+        executeRecaptchaActions();
+    };
     </script>
 </body>
 </html>
