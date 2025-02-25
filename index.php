@@ -14,7 +14,7 @@ if (empty($_SESSION['csrf_token'])) {
     <?php
     $config = require 'config.php';
     if ($config['captcha_type'] === 'recaptcha') {
-        echo '<script src="https://www.google.com/recaptcha/api.js?render=' . htmlspecialchars($config['recaptcha_site_key']) . '"></script>';
+        echo '<script async src="https://www.google.com/recaptcha/api.js?render=' . htmlspecialchars($config['recaptcha_site_key']) . '"></script>';
     }
     ?>
     <script src="scripts.js"></script>
@@ -44,7 +44,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'search')">Search</button>
+                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptchaSearch()">Search</button>
             </form>
         </div>
         
@@ -64,7 +64,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'upload')">Upload</button>
+                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptchaUpload()">Upload</button>
             </form>
         </div>
         
@@ -148,16 +148,22 @@ if (empty($_SESSION['csrf_token'])) {
         </table>
     </div>
     <script>
-        function executeRecaptcha(event, action) {
-            event.preventDefault();
+        function executeRecaptchaSearch() {
             grecaptcha.ready(function() {
-                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: action}).then(function(token) {
+                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: 'search'}).then(function(token) {
+                    console.log(token);
                     document.getElementById('recaptcha_token').value = token;
-                    if (action === 'search') {
-                        document.getElementById('search-form').submit();
-                    } else if (action === 'upload') {
-                        document.getElementById('upload-form').submit();
-                    }
+                    document.getElementById('search-form').submit();
+                });
+            });
+        }
+
+        function executeRecaptchaUpload() {
+            grecaptcha.ready(function() {
+                grecaptcha.execute('<?php echo htmlspecialchars($config['recaptcha_site_key']); ?>', {action: 'upload'}).then(function(token) {
+                    console.log(token);
+                    document.getElementById('recaptcha_token').value = token;
+                    document.getElementById('upload-form').submit();
                 });
             });
         }
