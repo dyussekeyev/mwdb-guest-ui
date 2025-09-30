@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
 # Copy the application files to the /var/www/html directory in the container
 COPY . /var/www/html/
 
+# Add PHP upload limits (10MB) config
+COPY uploads.ini /usr/local/etc/php/conf.d/
+
 # Set the working directory
 WORKDIR /var/www/html
 
@@ -30,4 +33,3 @@ USER www-data
 
 # Start Apache server
 CMD ["apache2-foreground"]
-
