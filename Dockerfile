@@ -2,7 +2,7 @@
 FROM php:8.1-apache
 
 # Install GD library and its dependencies if your application needs image processing features
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends python3=3.13.5-1 \
     libfreetype-dev=2.13.3+dfsg-1 \
     libjpeg62-turbo-dev=1:2.1.5-4 \
     libpng-dev=1.6.48-1 \
