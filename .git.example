@@ -1,0 +1,5 @@
+API_URL=http://127.0.0.1:5000/api
+API_KEY=your_real_api_key
+RECAPTCHA_SITE_KEY=your_site_key
+RECAPTCHA_SECRET_KEY=your_secret_key
+CAPTCHA_TYPE=recaptcha
