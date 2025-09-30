@@ -13,8 +13,15 @@ RUN apt-get update && apt-get install -y \
 # Copy the application files to the /var/www/html directory in the container
 COPY . /var/www/html/
 
-# Copy .env file to the container
-COPY .env /var/www/html/.env
+# Remove .env and run-guest-ui.py if they were copied by the previous command (precaution)
+RUN rm -f /var/www/html/.env /var/www/html/run-guest-ui.py
+
+# Copy .env to /etc/
+COPY .env /etc/.env
+
+# Copy run-guest-ui.py to /usr/local/bin/
+COPY run-guest-ui.py /usr/local/bin/run-guest-ui.py
+RUN chmod +x /usr/local/bin/run-guest-ui.py
 
 # Add PHP upload limits (10MB) config
 COPY uploads.ini /usr/local/etc/php/conf.d/
@@ -34,5 +41,5 @@ RUN chown -R www-data:www-data /var/www/html
 # Switch to non-root user (www-data)
 USER www-data
 
-# Start Apache server
-CMD ["apache2-foreground"]
+# Start script and Apache server
+ENTRYPOINT ["/usr/local/bin/run-guest-ui.py"]
