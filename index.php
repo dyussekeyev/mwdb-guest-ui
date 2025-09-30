@@ -27,7 +27,6 @@ if (empty($_SESSION['csrf_token'])) {
             <div id="file-search-button" onclick="showTab('file-search')">File Search</div>
             <div id="file-upload-button" onclick="showTab('file-upload')">File Upload</div>
         </div>
-        
         <!-- Search Form -->
         <div id="file-search" class="tab">
             <form id="search-form" action="search.php" method="get">
@@ -47,13 +46,12 @@ if (empty($_SESSION['csrf_token'])) {
                 <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'search')">Search</button>
             </form>
         </div>
-        
         <!-- Upload Form -->
         <div id="file-upload" class="tab">
             <form id="upload-form" action="upload.php" method="post" enctype="multipart/form-data">
                 <label for="file">Choose file:</label>
                 <input type="file" id="file" name="file" required><br><br>
-                
+                <input type="hidden" name="MAX_FILE_SIZE" value="10485760">
                 <?php if ($config['captcha_type'] === 'recaptcha'): ?>
                     <input type="hidden" id="recaptcha_token_upload" name="recaptcha_token">
                 <?php else: ?>
@@ -67,9 +65,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'upload')">Upload</button>
             </form>
         </div>
-        
         <h2>Recent files</h2>
-        
         <!-- Recent Files Table -->
         <table border="1">
             <thead>
