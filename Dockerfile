@@ -24,5 +24,8 @@ RUN a2enmod rewrite
 # Set permissions for the Apache server
 RUN chown -R www-data:www-data /var/www/html
 
+# Switch to non-root user (www-data)
+USER www-data
+
 # Start Apache server
 CMD ["apache2-foreground"]
