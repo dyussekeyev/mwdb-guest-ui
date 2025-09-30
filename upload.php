@@ -22,6 +22,16 @@ session_start();
             exit;
         }
 
+        if (
+            $_FILES['file']['error'] === UPLOAD_ERR_INI_SIZE ||
+            $_FILES['file']['error'] === UPLOAD_ERR_FORM_SIZE ||
+			$_FILES['file']['size'] > 10485760
+        ) {
+            echo "<p>File is too large. Maximum allowed size is 10 MB.</p>";
+            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+            exit;
+        }
+
         if (!isset($_POST['upload_csrf_token']) || $_POST['upload_csrf_token'] !== $_SESSION['csrf_token']) {
             echo "<p>Invalid CSRF token. Please try again.</p>";
             echo '<a href="index.php" style="font-size:20px;">Go back</a>';
