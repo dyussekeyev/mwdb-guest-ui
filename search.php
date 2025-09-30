@@ -28,7 +28,7 @@ session_start();
             exit;
         }
 
-        $hash_value = filter_input(INPUT_GET, 'hash_value', FILTER_SANITIZE_STRING);
+        $hash_value = isset($_GET['hash_value']) ? trim(strip_tags($_GET['hash_value'])) : '';
         if (empty($hash_value)) {
             echo "<p>Invalid hash value provided. Please try again.</p>";
             echo '<a href="index.php" style="font-size:20px;">Go back</a>';
@@ -36,7 +36,7 @@ session_start();
         }
 
         if ($config['captcha_type'] === 'recaptcha' && isset($_GET['recaptcha_token'])) {
-            $recaptcha_token = filter_input(INPUT_GET, 'recaptcha_token', FILTER_SANITIZE_STRING);
+            $recaptcha_token = isset($_GET['recaptcha_token']) ? trim(strip_tags($_GET['recaptcha_token'])) : '';
             $secret_key = $config['recaptcha_secret_key'];
             
             // Verify reCAPTCHA
@@ -68,7 +68,7 @@ session_start();
                 exit;
             }
         } elseif ($config['captcha_type'] === 'custom' && isset($_GET['search_captcha_input'])) {
-            $captcha_input = filter_input(INPUT_GET, 'search_captcha_input', FILTER_SANITIZE_STRING);
+            $captcha_input = isset($_GET['search_captcha_input']) ? trim(strip_tags($_GET['search_captcha_input'])) : '';
             
             if ($captcha_input !== $_SESSION['captcha_text_search']) {
                 echo "<p>Incorrect captcha. Please try again.</p>";
