@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
 # Copy the application files to the /var/www/html directory in the container
 COPY . /var/www/html/
 
+# Copy .env file to the container
+COPY .env /var/www/html/.env
+
 # Add PHP upload limits (10MB) config
 COPY uploads.ini /usr/local/etc/php/conf.d/
 
