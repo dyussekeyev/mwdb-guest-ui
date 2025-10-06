@@ -1,6 +1,10 @@
 <?php
 session_start();
 require_once 'security_headers.php';
+require_once 'ApiClient.php';
+require_once 'CaptchaValidator.php';
+require_once 'InputValidator.php';
+require_once 'HtmlHelper.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,213 +21,60 @@ require_once 'security_headers.php';
         <?php
         $config = require 'config.php';
 
+        // Validate hash value exists
         if (!isset($_GET['hash_value'])) {
-            echo "<p>No hash value provided. Please try again.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+            HtmlHelper::renderError('No hash value provided. Please try again.');
             exit;
         }
 
-        if (!isset($_GET['search_csrf_token']) || $_GET['search_csrf_token'] !== $_SESSION['csrf_token']) {
-            echo "<p>Invalid CSRF token. Please try again.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+        // Validate CSRF token
+        if (!isset($_GET['search_csrf_token']) || !InputValidator::validateCsrfToken($_GET['search_csrf_token'])) {
+            HtmlHelper::renderError('Invalid CSRF token. Please try again.');
             exit;
         }
 
-        $hash_value = isset($_GET['hash_value']) ? trim(strip_tags($_GET['hash_value'])) : '';
-        if (empty($hash_value)) {
-            echo "<p>Invalid hash value provided. Please try again.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+        // Sanitize and validate hash
+        $hash_value = trim(strip_tags($_GET['hash_value']));
+        if (empty($hash_value) || !InputValidator::validateHash($hash_value)) {
+            HtmlHelper::renderError('Invalid hash format. Please provide a valid MD5, SHA1, SHA256, or SHA512 hash.');
             exit;
         }
 
-        // Validate hash format (MD5: 32, SHA1: 40, SHA256: 64, SHA512: 128 hex chars)
-        if (!preg_match('/^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$|^[a-fA-F0-9]{128}$/', $hash_value)) {
-            echo "<p>Invalid hash format. Please provide a valid MD5, SHA1, SHA256, or SHA512 hash.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-            exit;
-        }
-
-        if ($config['captcha_type'] === 'recaptcha' && isset($_GET['recaptcha_token'])) {
-            $recaptcha_token = isset($_GET['recaptcha_token']) ? trim(strip_tags($_GET['recaptcha_token'])) : '';
-            $secret_key = $config['recaptcha_secret_key'];
-            
-            // Verify reCAPTCHA using CURL for better timeout control
-            $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
-            $recaptcha_data = [
-                'secret' => $secret_key,
-                'response' => $recaptcha_token
-            ];
-            
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $recaptcha_url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($recaptcha_data));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            
-            $recaptcha_verification = curl_exec($ch);
-            if (curl_errno($ch)) {
-                error_log('reCAPTCHA verification request failed: ' . curl_error($ch));
-                curl_close($ch);
-                echo "<p>reCAPTCHA verification request failed. Please try again.</p>";
-                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-                exit;
-            }
-            curl_close($ch);
-            
-            $recaptcha_result = json_decode($recaptcha_verification, true);
-            
-            if (!$recaptcha_result || !isset($recaptcha_result['success']) || !$recaptcha_result['success']) {
-                error_log('reCAPTCHA verification failed: ' . ($recaptcha_verification ?: 'Invalid response'));
-                echo "<p>reCAPTCHA verification failed. Please try again.</p>";
-                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-                exit;
-            }
-        } elseif ($config['captcha_type'] === 'custom' && isset($_GET['search_captcha_input'])) {
-            $captcha_input = isset($_GET['search_captcha_input']) ? trim(strip_tags($_GET['search_captcha_input'])) : '';
-            
-            if ($captcha_input !== $_SESSION['captcha_text_search']) {
-                echo "<p>Incorrect captcha. Please try again.</p>";
-                echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-                exit;
-            }
-            // Clear captcha after successful validation
-            unset($_SESSION['captcha_text_search']);
-        } else {
-            echo "<p>No captcha input provided. Please try again.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+        // Validate CAPTCHA
+        $captchaValidator = new CaptchaValidator($config);
+        $captchaResult = $captchaValidator->validate($_GET, 'captcha_text_search');
+        
+        if (!$captchaResult['valid']) {
+            HtmlHelper::renderError($captchaResult['error'] . '. Please try again.');
             exit;
         }
         
-        // Load API key from configuration
-        $api_url = $config['api_url'];
-        $api_key = $config['api_key'];
+        // Fetch file information
+        $apiClient = new ApiClient($config);
+        $fileResult = $apiClient->getFile($hash_value);
 
-        // Perform the search request
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "$api_url/file/$hash_value");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "accept: application/json",
-            "Authorization: Bearer $api_key"
-        ]);
-
-        $response = curl_exec($ch);
-        if (curl_errno($ch)) {
-            error_log('CURL error: ' . curl_error($ch));
-            echo "<p>Error fetching file. Please try again later.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-            curl_close($ch);
-            exit;
-        }
-        
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($http_code < 200 || $http_code >= 300) {
-            echo "<p>Error fetching file. HTTP code: $http_code</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+        if (!$fileResult['success']) {
+            HtmlHelper::renderError('Error fetching file. ' . $fileResult['error']);
             exit;
         }
 
-        $file = json_decode($response, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log('JSON decode error: ' . json_last_error_msg());
-            echo "<p>Error processing response. Please try again later.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-            exit;
-        }
+        $file = $fileResult['data'];
 
         if (isset($file['message']) && $file['message'] == 'Object not found') {
-            echo "<p>File not found.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
+            HtmlHelper::renderError('File not found.');
         } else {
-            echo "<table border='1'>";
-            echo "<thead>";
-            echo "<tr><th>Key</th><th>Value</th></tr>";
-            echo "</thead>";
-            echo "<tbody>";
-            echo "<tr><td>File name</td><td>" . htmlspecialchars($file['file_name'] ?? '') . "</td></tr>";
-            if (!empty($file['alt_names'])) {
-                foreach ($file['alt_names'] as $alt_name) {
-                    echo "<tr><td>Alt name</td><td>" . htmlspecialchars($alt_name) . "</td></tr>";
-                }
-            }
-            echo "<tr><td>MD5</td><td>" . htmlspecialchars($file['md5'] ?? '') . "</td></tr>";
-            echo "<tr><td>SHA1</td><td>" . htmlspecialchars($file['sha1'] ?? '') . "</td></tr>";
-            echo "<tr><td>SHA256</td><td>" . htmlspecialchars($file['sha256'] ?? '') . "</td></tr>";
-            echo "<tr><td>SHA512</td><td>" . htmlspecialchars($file['sha512'] ?? '') . "</td></tr>";
-            echo "<tr><td>CRC32</td><td>" . htmlspecialchars($file['crc32'] ?? '') . "</td></tr>";
-            echo "<tr><td>ssdeep</td><td>" . htmlspecialchars($file['ssdeep'] ?? '') . "</td></tr>";
-            echo "<tr><td>File type</td><td>" . htmlspecialchars($file['file_type'] ?? '') . "</td></tr>";
-            echo "<tr><td>File size</td><td>" . htmlspecialchars($file['file_size'] ?? '') . "</td></tr>";
-            echo "</tbody>";
-            echo "</table>";
+            HtmlHelper::renderFileTable($file);
         }
 
-        // Perform the comments request
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "$api_url/file/$hash_value/comment");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "accept: application/json",
-            "Authorization: Bearer $api_key"
-        ]);
+        // Fetch comments
+        $commentsResult = $apiClient->getFileComments($hash_value);
 
-        $comments_response = curl_exec($ch);
-        if (curl_errno($ch)) {
-            error_log('CURL error: ' . curl_error($ch));
-            echo "<p>Error fetching comments. Please try again later.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-            curl_close($ch);
+        if (!$commentsResult['success']) {
+            HtmlHelper::renderError('Error fetching comments. ' . $commentsResult['error']);
             exit;
         }
 
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($http_code < 200 || $http_code >= 300) {
-            echo "<p>Error fetching comments. HTTP code: $http_code</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-            exit;
-        }
-
-        $comments = json_decode($comments_response, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log('JSON decode error: ' . json_last_error_msg());
-            echo "<p>Error processing comments response. Please try again later.</p>";
-            echo '<a href="index.php" style="font-size:20px;">Go back</a>';
-            exit;
-        }
-
-        if (!empty($comments)) {
-            echo "<table border='1' style='width:100%; margin-top:20px;'>";
-            echo "<thead>";
-            echo "<tr><th style='width:25%;'>Author and Date</th><th style='width:75%;'>Comment</th></tr>";
-            echo "</thead>";
-            echo "<tbody>";
-            foreach ($comments as $comment) {
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($comment['author']) . "<br>" . htmlspecialchars($comment['timestamp']) . "</td>";
-                echo "<td>" . nl2br(htmlspecialchars($comment['comment'])) . "</td>";
-                echo "</tr>";
-            }
-            echo "</tbody>";
-            echo "</table>";
-        } else {
-            echo "<p>No comments found.</p>";
-        }
+        HtmlHelper::renderCommentsTable($commentsResult['data']);
         ?>
         <a href="index.php" style="font-size:20px;">Go back</a>
     </div>

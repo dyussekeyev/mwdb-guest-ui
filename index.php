@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once 'security_headers.php';
+require_once 'ApiClient.php';
+require_once 'HtmlHelper.php';
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -79,71 +81,21 @@ if (empty($_SESSION['csrf_token'])) {
             </thead>
             <tbody>
                 <?php
-                // Fetch recent files using CURL
-                $api_url = $config['api_url'];
-                $api_key = $config['api_key'];
-    
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, "$api_url/file?count=10");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    "accept: application/json",
-                    "Authorization: Bearer $api_key"
-                ]);
-    
-                $response = curl_exec($ch);
-                $curl_error = curl_errno($ch);
-                $curl_error_msg = curl_error($ch);
-                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+                // Fetch recent files using API client
+                $config = require 'config.php';
+                $apiClient = new ApiClient($config);
+                $result = $apiClient->getRecentFiles(10);
 
-                if ($curl_error) {
-                    error_log('CURL error: ' . $curl_error_msg);
+                if (!$result['success']) {
                     echo "<tr><td colspan='4'>Error fetching recent files. Please check the logs for details.</td></tr>";
-                } elseif ($http_code < 200 || $http_code >= 300) {
-                    echo "<tr><td colspan='4'>Error fetching recent files. HTTP code: $http_code</td></tr>";
                 } else {
-                    $files = json_decode($response, true);
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-                        error_log('JSON decode error: ' . json_last_error_msg());
-                        echo "<tr><td colspan='4'>Error decoding response. Please check the logs for details.</td></tr>";
-                    } else {
-                        if (!empty($files['files'])) {
-                            foreach ($files['files'] as $file) {
-                                echo "<tr>";
-                                echo "<td>";
-                                $file_name = htmlspecialchars($file['file_name'] ?? '');
-                                if (strlen($file_name) > 60) {
-                                    $file_name = substr($file_name, 0, 60) . '[...]';
-                                }
-                                echo "File Name: " . $file_name . "<br>";
-                                echo "MD5: " . htmlspecialchars($file['md5'] ?? '') . "<br>";
-                                echo "SHA1: " . htmlspecialchars($file['sha1'] ?? '') . "<br>";
-                                echo "SHA256: " . htmlspecialchars($file['sha256'] ?? '');
-                                echo "</td>";
-                                echo "<td class='table-column-type'>";
-                                echo "File Type: " . htmlspecialchars($file['file_type'] ?? '') . "<br>";
-                                echo "File Size: " . htmlspecialchars($file['file_size'] ?? '');
-                                echo "</td>";
-                                echo "<td class='table-column-tags'>";
-                                if (!empty($file['tags'])) {
-                                    foreach ($file['tags'] as $tag) {
-                                        echo htmlspecialchars($tag['tag'] ?? '') . "<br>";
-                                    }
-                                }
-                                echo "</td>";
-                                $upload_time = htmlspecialchars($file['upload_time'] ?? '');
-                                $formatted_time = date("H:i:s d.m.Y", strtotime($upload_time));
-                                echo "<td>" . $formatted_time . "</td>";
-                                echo "</tr>";
-                            }
-                        } else {
-                            echo "<tr><td colspan='4'>No recent files found.</td></tr>";
+                    $files = $result['data'];
+                    if (!empty($files['files'])) {
+                        foreach ($files['files'] as $file) {
+                            HtmlHelper::renderRecentFileRow($file);
                         }
+                    } else {
+                        echo "<tr><td colspan='4'>No recent files found.</td></tr>";
                     }
                 }
                 ?>
