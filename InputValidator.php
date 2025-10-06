@@ -10,7 +10,7 @@ class InputValidator {
      * @param string $token Token from request
      * @return bool True if valid
      */
-    public static function validateCsrfToken($token) {
+    public static function validateCsrfToken(string $token): bool {
         return isset($_SESSION['csrf_token']) && $token === $_SESSION['csrf_token'];
     }
 
@@ -20,8 +20,8 @@ class InputValidator {
      * @param string $hash Hash value
      * @return bool True if valid
      */
-    public static function validateHash($hash) {
-        return preg_match('/^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$|^[a-fA-F0-9]{128}$/', $hash);
+    public static function validateHash(string $hash): bool {
+        return preg_match('/^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$|^[a-fA-F0-9]{128}$/', $hash) === 1;
     }
 
     /**
@@ -30,7 +30,7 @@ class InputValidator {
      * @param int $max_size Maximum file size in bytes
      * @return array Result with 'valid' and 'error' keys
      */
-    public static function validateFileUpload($max_size = 10485760) {
+    public static function validateFileUpload(int $max_size = 10485760): array {
         if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
             return [
                 'valid' => false,

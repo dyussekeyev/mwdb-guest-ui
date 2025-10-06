@@ -4,10 +4,10 @@
  * Handles both reCAPTCHA and custom CAPTCHA verification
  */
 class CaptchaValidator {
-    private $captcha_type;
-    private $recaptcha_secret_key;
+    private string $captcha_type;
+    private string $recaptcha_secret_key;
 
-    public function __construct($config) {
+    public function __construct(array $config) {
         $this->captcha_type = $config['captcha_type'];
         $this->recaptcha_secret_key = $config['recaptcha_secret_key'] ?? '';
     }
@@ -19,12 +19,10 @@ class CaptchaValidator {
      * @param string $session_key Session key for custom CAPTCHA
      * @return array Result with 'valid' and 'error' keys
      */
-    public function validate($input, $session_key) {
-        if ($this->captcha_type === 'recaptcha') {
-            return $this->validateRecaptcha($input);
-        } else {
-            return $this->validateCustomCaptcha($input, $session_key);
-        }
+    public function validate(array $input, string $session_key): array {
+        return $this->captcha_type === 'recaptcha' 
+            ? $this->validateRecaptcha($input) 
+            : $this->validateCustomCaptcha($input, $session_key);
     }
 
     /**
@@ -33,7 +31,7 @@ class CaptchaValidator {
      * @param array $input Input data containing recaptcha_token
      * @return array Result with 'valid' and 'error' keys
      */
-    private function validateRecaptcha($input) {
+    private function validateRecaptcha(array $input): array {
         if (!isset($input['recaptcha_token'])) {
             return [
                 'valid' => false,
@@ -43,17 +41,13 @@ class CaptchaValidator {
 
         $recaptcha_token = trim(strip_tags($input['recaptcha_token']));
         
-        // Verify reCAPTCHA using CURL for better timeout control
-        $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
-        $recaptcha_data = [
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
             'secret' => $this->recaptcha_secret_key,
             'response' => $recaptcha_token
-        ];
-        
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $recaptcha_url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($recaptcha_data));
+        ]));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
@@ -91,7 +85,7 @@ class CaptchaValidator {
      * @param string $session_key Session key where captcha text is stored
      * @return array Result with 'valid' and 'error' keys
      */
-    private function validateCustomCaptcha($input, $session_key) {
+    private function validateCustomCaptcha(array $input, string $session_key): array {
         $input_key = $session_key . '_input';
         
         if (!isset($input[$input_key])) {
