@@ -27,6 +27,18 @@ To install and run the project as a Docker container, follow these steps:
 ## Usage
 ...
 
+## Security
+
+For important security considerations and best practices, see [SECURITY.md](SECURITY.md).
+
+Key security features:
+- CSRF protection on all forms
+- CAPTCHA support (Google reCAPTCHA v3 or custom)
+- Input validation and sanitization
+- Security headers (CSP, X-Frame-Options, etc.)
+- SSL/TLS certificate verification
+- Timeout protection on API calls
+
 ## Contributing
 If you wish to contribute to the project, please follow these steps:
 
