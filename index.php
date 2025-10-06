@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'security_headers.php';
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -43,7 +44,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="search_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'search')">Search</button>
+                <button type="submit" style="height:50px; width:150px" <?php if ($config['captcha_type'] === 'recaptcha'): ?>onclick="executeRecaptcha(event, 'search')"<?php endif; ?>>Search</button>
             </form>
         </div>
         <!-- Upload Form -->
@@ -62,7 +63,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php endif; ?>
                 
                 <input type="hidden" name="upload_csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <button type="submit" style="height:50px; width:150px" onclick="executeRecaptcha(event, 'upload')">Upload</button>
+                <button type="submit" style="height:50px; width:150px" <?php if ($config['captcha_type'] === 'recaptcha'): ?>onclick="executeRecaptcha(event, 'upload')"<?php endif; ?>>Upload</button>
             </form>
         </div>
         <h2>Recent files</h2>
@@ -85,17 +86,23 @@ if (empty($_SESSION['csrf_token'])) {
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_URL, "$api_url/file?count=10");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     "accept: application/json",
                     "Authorization: Bearer $api_key"
                 ]);
     
                 $response = curl_exec($ch);
+                $curl_error = curl_errno($ch);
+                $curl_error_msg = curl_error($ch);
                 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
 
-                if (curl_errno($ch)) {
-                    error_log('CURL error: ' . curl_error($ch));
+                if ($curl_error) {
+                    error_log('CURL error: ' . $curl_error_msg);
                     echo "<tr><td colspan='4'>Error fetching recent files. Please check the logs for details.</td></tr>";
                 } elseif ($http_code !== 200) {
                     echo "<tr><td colspan='4'>Error fetching recent files. HTTP code: $http_code</td></tr>";
@@ -110,7 +117,7 @@ if (empty($_SESSION['csrf_token'])) {
                                 echo "<tr>";
                                 echo "<td>";
                                 $file_name = htmlspecialchars($file['file_name'] ?? '');
-                                if (strlen($file_name) > 30) {
+                                if (strlen($file_name) > 60) {
                                     $file_name = substr($file_name, 0, 60) . '[...]';
                                 }
                                 echo "File Name: " . $file_name . "<br>";

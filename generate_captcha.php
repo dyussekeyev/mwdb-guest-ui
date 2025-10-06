@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'security_headers.php';
 
 // Determine the captcha type based on the query parameter
 $captcha_type = isset($_GET['type']) ? $_GET['type'] : 'search';

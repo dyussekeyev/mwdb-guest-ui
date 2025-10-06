@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'security_headers.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -65,7 +66,8 @@ session_start();
             }
             $recaptcha_result = json_decode($recaptcha_verification, true);
             
-            if (!$recaptcha_result['success']) {
+            if (!$recaptcha_result || !isset($recaptcha_result['success']) || !$recaptcha_result['success']) {
+                error_log('reCAPTCHA verification failed: ' . ($recaptcha_verification ?: 'Invalid response'));
                 echo "<p>reCAPTCHA verification failed. Please try again.</p>";
                 echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
@@ -78,6 +80,8 @@ session_start();
                 echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
+            // Clear captcha after successful validation
+            unset($_SESSION['captcha_text_upload']);
         } else {
             echo "<p>No captcha input provided. Please try again.</p>";
             echo '<a href="index.php" style="font-size:20px;">Go back</a>';
@@ -94,6 +98,10 @@ session_start();
         curl_setopt($ch, CURLOPT_URL, "$api_url/file");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "accept: application/json",
             "Authorization: Bearer $api_key",
