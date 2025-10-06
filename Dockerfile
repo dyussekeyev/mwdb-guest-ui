@@ -17,7 +17,7 @@ COPY . /var/www/html/
 RUN rm -f /var/www/html/.env /var/www/html/run-guest-ui.py
 
 # Copy .env to /etc/
-COPY .env /etc/.env
+COPY .env.example /etc/.env
 
 # Copy run-guest-ui.py to /usr/local/bin/
 COPY run-guest-ui.py /usr/local/bin/run-guest-ui.py
@@ -46,5 +46,6 @@ USER www-data
 
 # Start script and Apache server
 ENTRYPOINT ["/usr/local/bin/run-guest-ui.py"]
+
 
 
