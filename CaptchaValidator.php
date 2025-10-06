@@ -86,7 +86,9 @@ class CaptchaValidator {
      * @return array Result with 'valid' and 'error' keys
      */
     private function validateCustomCaptcha(array $input, string $session_key): array {
-        $input_key = $session_key . '_input';
+        // Extract type from session_key (e.g., "captcha_text_search" -> "search")
+        $type = str_replace('captcha_text_', '', $session_key);
+        $input_key = $type . '_captcha_input';
         
         if (!isset($input[$input_key])) {
             return [
