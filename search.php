@@ -47,27 +47,33 @@ require_once 'security_headers.php';
             $recaptcha_token = isset($_GET['recaptcha_token']) ? trim(strip_tags($_GET['recaptcha_token'])) : '';
             $secret_key = $config['recaptcha_secret_key'];
             
-            // Verify reCAPTCHA
+            // Verify reCAPTCHA using CURL for better timeout control
             $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
             $recaptcha_data = [
                 'secret' => $secret_key,
                 'response' => $recaptcha_token
             ];
-            $options = [
-                'http' => [
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'method'  => 'POST',
-                    'content' => http_build_query($recaptcha_data)
-                ]
-            ];
-            $context  = stream_context_create($options);
-            $recaptcha_verification = file_get_contents($recaptcha_url, false, $context);
-            if ($recaptcha_verification === FALSE) {
-                error_log('reCAPTCHA verification request failed.');
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $recaptcha_url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($recaptcha_data));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            
+            $recaptcha_verification = curl_exec($ch);
+            if (curl_errno($ch)) {
+                error_log('reCAPTCHA verification request failed: ' . curl_error($ch));
+                curl_close($ch);
                 echo "<p>reCAPTCHA verification request failed. Please try again.</p>";
                 echo '<a href="index.php" style="font-size:20px;">Go back</a>';
                 exit;
             }
+            curl_close($ch);
+            
             $recaptcha_result = json_decode($recaptcha_verification, true);
             
             if (!$recaptcha_result || !isset($recaptcha_result['success']) || !$recaptcha_result['success']) {
@@ -121,7 +127,7 @@ require_once 'security_headers.php';
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($http_code !== 200) {
+        if ($http_code < 200 || $http_code >= 300) {
             echo "<p>Error fetching file. HTTP code: $http_code</p>";
             echo '<a href="index.php" style="font-size:20px;">Go back</a>';
             exit;
@@ -187,7 +193,7 @@ require_once 'security_headers.php';
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($http_code !== 200) {
+        if ($http_code < 200 || $http_code >= 300) {
             echo "<p>Error fetching comments. HTTP code: $http_code</p>";
             echo '<a href="index.php" style="font-size:20px;">Go back</a>';
             exit;

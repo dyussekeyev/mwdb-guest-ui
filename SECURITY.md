@@ -83,10 +83,57 @@ Adjust these in the code if your API requires longer timeouts.
 
 ## Known Limitations
 
-1. No built-in rate limiting (implement at web server level)
+1. No built-in rate limiting - **strongly recommended to implement at web server level**
 2. No account management (this is intentional for guest access)
 3. Session hijacking protection relies on PHP session configuration
 4. CAPTCHA can be bypassed by determined attackers (consider additional protections)
+
+### Implementing Rate Limiting
+
+Rate limiting is critical to prevent abuse. Here are recommendations for common web servers:
+
+#### Nginx Example:
+```nginx
+limit_req_zone $binary_remote_addr zone=search:10m rate=5r/m;
+limit_req_zone $binary_remote_addr zone=upload:10m rate=2r/m;
+
+server {
+    location /search.php {
+        limit_req zone=search burst=10 nodelay;
+    }
+    
+    location /upload.php {
+        limit_req zone=upload burst=3 nodelay;
+    }
+}
+```
+
+#### Apache Example (.htaccess or httpd.conf):
+```apache
+<IfModule mod_ratelimit.c>
+    <Location /search.php>
+        SetOutputFilter RATE_LIMIT
+        SetEnv rate-limit 400
+    </Location>
+    
+    <Location /upload.php>
+        SetOutputFilter RATE_LIMIT
+        SetEnv rate-limit 200
+    </Location>
+</IfModule>
+```
+
+Or use mod_evasive:
+```apache
+<IfModule mod_evasive20.c>
+    DOSHashTableSize 3097
+    DOSPageCount 5
+    DOSSiteCount 50
+    DOSPageInterval 1
+    DOSSiteInterval 1
+    DOSBlockingPeriod 60
+</IfModule>
+```
 
 ## Reporting Security Issues
 

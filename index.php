@@ -104,7 +104,7 @@ if (empty($_SESSION['csrf_token'])) {
                 if ($curl_error) {
                     error_log('CURL error: ' . $curl_error_msg);
                     echo "<tr><td colspan='4'>Error fetching recent files. Please check the logs for details.</td></tr>";
-                } elseif ($http_code !== 200) {
+                } elseif ($http_code < 200 || $http_code >= 300) {
                     echo "<tr><td colspan='4'>Error fetching recent files. HTTP code: $http_code</td></tr>";
                 } else {
                     $files = json_decode($response, true);

@@ -26,6 +26,9 @@ RUN chmod +x /usr/local/bin/run-guest-ui.py
 # Add PHP upload limits (10MB) config
 COPY uploads.ini /usr/local/etc/php/conf.d/
 
+# Add PHP security configuration
+COPY security.ini /usr/local/etc/php/conf.d/
+
 # Set the working directory
 WORKDIR /var/www/html
 
